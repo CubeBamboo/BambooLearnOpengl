@@ -1,0 +1,587 @@
+// 2_5 投光物
+
+#define STB_IMAGE_IMPLEMENTATION
+
+#include <iostream>
+#include <string>
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glm\glm\glm.hpp>
+#include <glm\glm\gtc\matrix_transform.hpp>
+#include <glm\glm\gtc\type_ptr.hpp>
+
+#include "utils.hpp"
+#include "Shader.h"
+#include "stb_image.h"
+#include "Camera.hpp"
+
+using namespace std;
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow* window);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+unsigned int load_texture(char const* path);
+
+// settings
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+const std::string rootPath = "F:\\MyProject\\LearnOpenGL-Ash\\lopgl_ash";
+const std::string exe2ProjPathPrefix = "..\\..";
+std::string vertexShaderSource = read_txt_file(rootPath + "\\shader\\vert.txt").c_str();
+std::string vertexShader2Source = read_txt_file(rootPath + "\\shader\\vert2.txt").c_str();
+std::string fragmentShaderSource = read_txt_file(rootPath + "\\shader\\frag.txt").c_str();
+std::string fragmentShader2Source = read_txt_file(rootPath + "\\shader\\frag2.txt").c_str();
+
+float uniKeyVal = 0.2f;
+
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
+float deltaTime = 0.0f; // 当前帧与上一帧的时间差
+float lastFrame = 0.0f; // 上一帧的时间
+
+bool firstMouse = true;
+float lastX = SCR_WIDTH / 2.0;
+float lastY = SCR_HEIGHT / 2.0;
+
+// lighting
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+float vertices[] = {
+    // positions          // normals           // texture coords
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+};
+
+glm::vec3 cubePositions[] = {
+    glm::vec3(0.0f,  0.0f,  0.0f),
+    glm::vec3(2.0f,  5.0f, -15.0f),
+    glm::vec3(-1.5f, -2.2f, -2.5f),
+    glm::vec3(-3.8f, -2.0f, -12.3f),
+    glm::vec3(2.4f, -0.4f, -3.5f),
+    glm::vec3(-1.7f,  3.0f, -7.5f),
+    glm::vec3(1.3f, -2.0f, -2.5f),
+    glm::vec3(1.5f,  2.0f, -2.5f),
+    glm::vec3(1.5f,  0.2f, -1.5f),
+    glm::vec3(-1.3f,  1.0f, -1.5f)
+};
+
+int main()
+{
+    #pragma region glfwWin & callback
+
+    // ------------------------------
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    #ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    #endif
+
+    // --------------------
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    if (window == NULL)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    // tell GLFW to capture our mouse
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // ---------------------------------------
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
+
+    #pragma endregion
+
+	Shader cubeShader(vertexShaderSource, fragmentShaderSource);
+	Shader lightShader(vertexShader2Source, fragmentShader2Source);
+
+    // ------------------------------------------------------------------
+
+    #pragma region VAO
+
+	unsigned int VBO[1], VAO[2]; // [0] normal cube, [1] light cube
+    glGenVertexArrays(2, VAO);
+    glGenBuffers(1, VBO);
+    
+    // cube1
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindVertexArray(VAO[0]);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // cube2
+    //glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
+    glBindVertexArray(VAO[1]);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    #pragma endregion
+
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // ============================================
+
+    #pragma region stbi
+
+    stbi_set_flip_vertically_on_load(true); // 纹理y轴翻转
+
+    auto texFile = "F:\\MyProject\\LearnOpenGL-Ash\\lopgl_ash\\res\\container.jpg";
+	unsigned int texture = load_texture(texFile);
+    texFile = "F:\\MyProject\\LearnOpenGL-Ash\\lopgl_ash\\res\\awesomeface.png";
+	unsigned int texture2 = load_texture(texFile);
+    texFile = "F:\\MyProject\\LearnOpenGL-Ash\\lopgl_ash\\res\\container2.png";
+    unsigned int texture3 = load_texture(texFile);
+    texFile = "F:\\MyProject\\LearnOpenGL-Ash\\lopgl_ash\\res\\container2_specular.png";
+    unsigned int texture4 = load_texture(texFile);
+
+    #pragma endregion
+
+    cubeShader.use();
+    cubeShader.setInt("material.diffuse", 0);
+    cubeShader.setInt("material.specular", 1);
+
+	glEnable(GL_DEPTH_TEST);
+
+    // --------while loop-----------
+    while (!glfwWindowShouldClose(window))
+    {
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        float sinVal0 = (sin(glfwGetTime()));
+
+        // $$ point light (attenuation)shuai-jian
+        //lightPos = glm::vec3(1.4f, 0.f, 2.5f)
+        //    + glm::vec3(sin(glfwGetTime() - 2.f) * 5.7f,
+        //                sin(glfwGetTime() / 2.0f) * 1.0f, 
+        //                sin(glfwGetTime() / 4.0f) * 1.25f);
+
+        //$$ spot light
+        lightPos = glm::vec3(1.4f, 0.f, 2.5f)
+            + glm::vec3(sin(glfwGetTime() - 2.f) * 0.7f,
+                sin(glfwGetTime() / 2.0f) * 1.0f,
+                sin(glfwGetTime() / 4.0f) * 1.25f);
+
+
+        // -----
+        processInput(window);
+
+        // ------
+        //glClear(GL_COLOR_BUFFER_BIT);
+        //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        #pragma region shader uniform
+
+        // ==uniform
+
+        cubeShader.use();
+        glm::vec3 lightColor;
+        lightColor.x = static_cast<float>(sin(glfwGetTime() * 2.0));
+        lightColor.y = static_cast<float>(sin(glfwGetTime() * 0.7));
+        lightColor.z = static_cast<float>(sin(glfwGetTime() * 1.3));
+
+        //cubeShader.setVec3("texColor", 1.0f, 0.5f, 0.31f);
+        cubeShader.setVec3("lightColor", lightColor);
+        
+		//$$point light (attenuation)
+        //cubeShader.setVec3("light.position", lightPos);
+        //cubeShader.setVec3("light.direction", -0.2f, -1.0f, -0.3f);
+        
+        //$$spot light
+        cubeShader.setVec3("light.position", camera.Position);
+        cubeShader.setVec3("light.direction", camera.Front);
+        cubeShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+        cubeShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
+        cubeShader.setVec3("viewPos", camera.Position);
+
+        // light properties
+        cubeShader.setVec3("light.ambient", 1.0f, 1.0f, 1.0f); // note that all light colors are set at full intensity
+        cubeShader.setVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
+        cubeShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+        cubeShader.setFloat("light.constant", 1.0f);
+        cubeShader.setFloat("light.linear", 0.09f);
+        cubeShader.setFloat("light.quadratic", 0.032f);
+
+        // material properties
+        cubeShader.setVec3("material.ambient", 0.0f, 0.1f, 0.06f);
+        cubeShader.setVec3("material.diffuse", 0.0f, 0.50980392f, 0.50980392f);
+        cubeShader.setVec3("material.specular", 0.50196078f, 0.50196078f, 0.50196078f);
+        cubeShader.setFloat("material.shininess", 32.0f);
+
+        #pragma endregion
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture3);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture4);
+
+        glm::mat4 view;
+        view = camera.GetViewMatrix();
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 model = glm::mat4(1.0f);
+
+        glm::mat4 lightModel = glm::mat4(1.0f);
+        lightModel = glm::translate(lightModel, lightPos);
+        lightModel = glm::scale(lightModel, glm::vec3(0.2f)); // a smaller cube
+
+        cubeShader.setMat4("view", view);
+        cubeShader.setMat4("projection", projection);
+
+        glBindVertexArray(VAO[0]); // normal cube
+
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            // calculate the model matrix for each object and pass it to shader before drawing
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            cubeShader.setMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+		lightShader.use();
+
+        lightShader.setMat4("view", view);
+        lightShader.setMat4("projection", projection);
+        lightShader.setMat4("model", lightModel);
+
+        glBindVertexArray(VAO[1]); // light
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // -------------------------------------------------------------------------------
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    // ------------------------------------------------------------------------
+    glDeleteVertexArrays(2, VAO);
+    glDeleteBuffers(1, VBO);
+
+    // ------------------------------------------------------------------
+    glfwTerminate();
+    return 0;
+}
+
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
+void processInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        uniKeyVal += 0.001f;
+        if (uniKeyVal >= 1.0f)
+			uniKeyVal = 1.0f;
+
+        cout << "uniKeyVal: " << uniKeyVal << std::endl;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        uniKeyVal -= 0.001f;
+
+        if (uniKeyVal <= 0.0f)
+            uniKeyVal = 0.0f;
+
+        cout << "uniKeyVal: " << uniKeyVal << std::endl;
+    }
+
+    float cameraSpeed = 2.5f * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+    if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        camera.ProcessKeyboard(DOWN, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        camera.ProcessKeyboard(UP, deltaTime);
+}
+
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    // make sure the viewport matches the new window dimensions; note that width and 
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
+}
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.05;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+unsigned int load_texture(char const* path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    int width, height, nrComponents;
+    unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+    return textureID;
+}
+
+/*
+cubeFrag.shader
+$$$$point light (attenuation)shuai-jian
+#version 330 core
+
+struct Material {
+    vec3 ambient;
+    sampler2D diffuse;
+    sampler2D specular;
+    float shininess;
+
+    float density;
+};
+
+struct Light {
+    vec3 position;
+    vec3 direction;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
+uniform Material material;
+uniform Light light;
+uniform vec3 viewPos;
+
+in vec3 VertColor;
+in vec3 FragPos;
+in vec3 Normal;
+in vec2 TexCoords;
+
+out vec4 FragColor;
+
+void main()
+{
+    //ambient
+    vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb;
+
+    //diffuse
+    vec3 norm = normalize(Normal);
+    vec3 lightDir = normalize(light.position - FragPos);
+    float diff = dot(norm, lightDir);
+    diff = max(diff, 0.);
+    vec3 diffuse = light.diffuse * diff * texture(material.diffuse, TexCoords).rgb;
+
+    //specular
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.), material.shininess);
+    vec3 specular = light.specular * spec * texture(material.specular, TexCoords).rgb;
+
+    //attenuation
+    float distance    = length(light.position - FragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
+    ambient *= attenuation;
+    diffuse *= attenuation;
+    specular *= attenuation;
+
+    vec3 result = (ambient + diffuse + specular);
+    FragColor = vec4(result, 1.0);
+}
+*/
+
+/*
+cubeFrag.shader
+$$$$spot light
+#version 330 core
+
+struct Material {
+    vec3 ambient;
+    sampler2D diffuse;
+    sampler2D specular;
+    float shininess;
+
+    float density;
+};
+
+struct Light {
+    vec3 position;
+    vec3 direction;
+
+    float cutOff;
+    float outerCutOff;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+
+uniform Material material;
+uniform Light light;
+uniform vec3 viewPos;
+
+in vec3 VertColor;
+in vec3 FragPos;
+in vec3 Normal;
+in vec2 TexCoords;
+
+out vec4 FragColor;
+
+void main()
+{
+    vec3 lightDir = normalize(light.position - FragPos);
+    //attenuation
+    float distance    = length(light.position - FragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
+    float theta = dot(lightDir, normalize(-light.direction));
+    float epsilon   = light.cutOff - light.outerCutOff;
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+
+    //ambient
+    vec3 ambient = light.ambient * texture(material.diffuse, TexCoords).rgb;
+    ambient *= attenuation;
+
+    {
+        // 执行光照计算
+
+        //diffuse
+        vec3 norm = normalize(Normal);
+        float diff = dot(norm, lightDir);
+        diff = max(diff, 0.);
+        vec3 diffuse = light.diffuse * diff * texture(material.diffuse, TexCoords).rgb;
+
+        //specular
+        vec3 viewDir = normalize(viewPos - FragPos);
+        vec3 reflectDir = reflect(-lightDir, norm);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.), material.shininess);
+        vec3 specular = light.specular * spec * texture(material.specular, TexCoords).rgb;
+
+        diffuse *= attenuation * intensity;
+        specular *= attenuation * intensity;
+        vec3 result = (ambient + diffuse + specular);
+        FragColor = vec4(result, 1.0);
+    }
+}
+*/
