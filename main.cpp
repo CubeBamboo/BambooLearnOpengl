@@ -1,4 +1,4 @@
-// 5_8_1 ясЁыДжх╬
+// 5_8_1 Е╩╤Х©÷Ф╦╡Ф÷⌠
 #define STB_IMAGE_IMPLEMENTATION
 
 #include <glad/glad.h>

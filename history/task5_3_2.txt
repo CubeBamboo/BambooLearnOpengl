@@ -1,4 +1,4 @@
-// 5_3_2 µ„“ı”∞
+// 5_3_2 ÁÇπÈò¥ÂΩ±
 #define STB_IMAGE_IMPLEMENTATION
 
 #include <glad/glad.h>
