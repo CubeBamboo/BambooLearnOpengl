@@ -18,8 +18,8 @@
 #include <iostream>
 #include <cmath>
 
-const std::string rootPath = "F:\\MyProject\\LearnOpenGL-Ash\\lopgl_ash";
-const std::string rootShaderPath = "F:\\MyProject\\LearnOpenGL-Ash\\lopgl_ash\\shader\\learnopengl";
+const std::string rootPath = "F:\\MyProject\\LearnOpenGL-Ash\\BambooLearnOpengl";
+const std::string rootShaderPath = "F:\\MyProject\\LearnOpenGL-Ash\\BambooLearnOpengl\\shader\\learnopengl";
 const std::string exe2ProjPathPrefix = "..\\..";
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
