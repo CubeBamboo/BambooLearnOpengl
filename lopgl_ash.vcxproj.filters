@@ -24,6 +24,33 @@
     <ClCompile Include="Shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="breakout\game.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="breakout\shader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="breakout\texture.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="breakout\resource_manager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="breakout\sprite_renderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="breakout\game_object.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="breakout\game_level.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="breakout\ball_object.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="breakout\breakout_utils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils.hpp">
@@ -44,10 +71,35 @@
     <ClInclude Include="Model.h">
       <Filter>头文件</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="E:\HP\Downloads\wood.png">
-      <Filter>资源文件</Filter>
-    </Image>
+    <ClInclude Include="breakout\shader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="breakout\resource_manager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="breakout\texture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="breakout\game.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="breakout\program.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="breakout\sprite_renderer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="breakout\game_object.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="breakout\game_level.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="breakout\ball_object.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="breakout\breakout_utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

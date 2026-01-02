@@ -123,7 +123,9 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>F:\MyProject\LearnOpenGL-Ash\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:\MyProject\LearnOpenGL-Ash\include;F:\MyProject\LearnOpenGL-Ash\include\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,19 +153,35 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="breakout\ball_object.cpp" />
+    <ClCompile Include="breakout\breakout_utils.cpp" />
+    <ClCompile Include="breakout\game.cpp" />
+    <ClCompile Include="breakout\game_level.cpp" />
+    <ClCompile Include="breakout\game_object.cpp" />
+    <ClCompile Include="breakout\resource_manager.cpp" />
+    <ClCompile Include="breakout\shader.cpp" />
+    <ClCompile Include="breakout\sprite_renderer.cpp" />
+    <ClCompile Include="breakout\texture.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="breakout\ball_object.h" />
+    <ClInclude Include="breakout\breakout_utils.h" />
+    <ClInclude Include="breakout\game.h" />
+    <ClInclude Include="breakout\game_level.h" />
+    <ClInclude Include="breakout\game_object.h" />
+    <ClInclude Include="breakout\program.hpp" />
+    <ClInclude Include="breakout\resource_manager.h" />
+    <ClInclude Include="breakout\shader.h" />
+    <ClInclude Include="breakout\sprite_renderer.h" />
+    <ClInclude Include="breakout\texture.h" />
     <ClInclude Include="Camera.hpp" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="utils.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="E:\HP\Downloads\wood.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

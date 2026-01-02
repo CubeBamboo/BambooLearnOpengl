@@ -1,6 +1,9 @@
 #include "Shader.h"
+#include "utils.hpp"
 
 #include <iostream>
+
+using namespace learn;
 
 std::string read_txt_file(const std::string& filePath);
 

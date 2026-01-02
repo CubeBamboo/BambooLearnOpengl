@@ -2,6 +2,8 @@
 #include<string>
 #include<fstream>
 #include<sstream>
+#include<iostream>
+#include<glm/glm.hpp>
 
 std::string read_txt_file(const std::string& filePath) {
     if (filePath.empty())
