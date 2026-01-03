@@ -24,6 +24,14 @@ phong光照
 
 ![](/res_readme/trans_1.png)
 
+ShadowMapping（点光源）
+
+![](/res_readme/shadow_1.png)
+
 延迟渲染
 
 ![](/res_readme/defer_1.gif)
+
+打砖块（debug）、
+
+![](/res_readme/breakout_1.png)
