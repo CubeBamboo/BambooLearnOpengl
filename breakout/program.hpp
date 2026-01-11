@@ -1,5 +1,5 @@
 // used for another main_function entry, call return breakout_main() in your main(), dont include it twice plz.
-#define STB_IMAGE_IMPLEMENTATION
+//#define STB_IMAGE_IMPLEMENTATION
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

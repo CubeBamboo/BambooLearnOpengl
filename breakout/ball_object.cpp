@@ -1,5 +1,6 @@
 #include "ball_object.h"
 #include "breakout_utils.h"
+#include "game_object.h"
 
 using namespace breakout;
 

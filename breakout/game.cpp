@@ -8,6 +8,8 @@
 #include "ball_object.h"
 #include "breakout_utils.h"
 
+#include "program.hpp"
+
 using namespace breakout;
 
 // ====declaration====
